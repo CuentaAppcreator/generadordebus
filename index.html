@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Generador TMDB</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #121212;
+      color: #fff;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background-color: #1e1e1e;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+    }
+
+    h2 {
+      text-align: center;
+      color: #ffd700;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+      color: #ccc;
+    }
+
+    input, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border: none;
+      font-size: 16px;
+    }
+
+    input, textarea {
+      background-color: #2b2b2b;
+      color: #fff;
+    }
+
+    button {
+      background-color: #ffd700;
+      color: #000;
+      font-weight: bold;
+      margin-top: 20px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #e6c200;
+    }
+
+    textarea {
+      height: 250px;
+      resize: vertical;
+      font-family: monospace;
+    }
+
+    @media (max-width: 600px) {
+      h2 {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🎬 Generador de peliculas para el buscador </h2>
+<a href="#" >
+	<h3>Siguiente paso</h3></a>
+	
+    <label for="movieId">ID de TMDB:</label>
+    <input type="text" id="movieId" placeholder="Ej: 10991">
+
+    <label for="language">Idioma (código ISO):</label>
+    <input type="text" id="language" value="es" placeholder="Ej: es">
+
+    <label for="urlDestino">URL del enlace:</label>
+    <input type="text" id="urlDestino" placeholder="https://tusitio.com/pelicula.html">
+
+    <button onclick="generarCodigo()">🎬 Generar Código</button>
+
+    <label for="output">Código Generado:</label>
+    <textarea id="output" readonly></textarea>
+
+    <button onclick="copiar()">📋 Copiar al portapapeles</button>
+  </div>
+
+  <script>
+    async function generarCodigo() {
+      const movieId = document.getElementById('movieId').value.trim();
+      const languaje = document.getElementById('language').value.trim();
+      const url = document.getElementById('urlDestino').value.trim();
+      const apiKey = '1d79b0abc34e3411aed8ee793526693d';
+
+      if (!movieId || !url) {
+        alert('Por favor completa todos los campos.');
+        return;
+      }
+
+      const apiUrl = `https://api.themoviedb.org/3/movie/${movieId}?api_key=${apiKey}&language=${languaje}`;
+
+      try {
+        const res = await fetch(apiUrl);
+        const data = await res.json();
+
+        const title = data.title || 'Sin título';
+        const year = data.release_date ? data.release_date.slice(0, 4) : 'Año desconocido';
+        const overview = data.overview || 'Sin descripción disponible.';
+        const posterPath = data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : '';
+
+        const codigo = `<!-- ${title} -->
+<li>
+  <a href="${url}" tabindex="0" class="block outline-none focus:ring-2 ring-yellow-400 rounded">
+    <img src="${posterPath}" alt="poster" class="w-full aspect-[2/3] rounded-lg object-cover mb-2 sm:mb-0">
+    <span class="hidden">${title} ${year}</span>
+    <span class="hidden">${overview}</span>
+  </a>
+</li>
+<!--FIN-->`;
+
+        document.getElementById('output').value = codigo;
+      } catch (error) {
+        console.error(error);
+        alert('Error al obtener los datos desde TMDB.');
+      }
+    }
+
+    function copiar() {
+      const texto = document.getElementById('output');
+      texto.select();
+      document.execCommand('copy');
+      alert('¡Código copiado!');
+    }
+  </script>
+</body>
+</html>
